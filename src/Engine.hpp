@@ -17,29 +17,28 @@ class Engine {
   std::map<unsigned, TTF_Font*> font;
   std::map<std::string, SDL_Texture*> images;
 
+  bool exit = false;
+
   Uint32 ticks = 0;
   Uint32 frame_time;
   bool vsync = false;
   unsigned fps = 0;
   unsigned frame_counter = 0;
   float fps_timer = 0;
+  float fps_cap = 0;
 
-  bool exit;
-
-public:
-  // should be private or what
-  double fps_cap = 0;
-
-  const Uint8* keyboard_state = NULL;
-  Uint32 mouse_state;
   int mouse_position_x;
   int mouse_position_y;
-  int mouse_button_down;
-  int mouse_button_up;
+  bool mouse_button_down;
+  bool mouse_button_up;
   int mouse_scroll;
+public:
+  // should be private or what
+  const Uint8* keyboard_state = NULL;
+  Uint32 mouse_state;
 
   // construct, destruct
-  Engine(const int& width, const int& height, const std::string& title);
+  Engine(const int& width, const int& height, const std::string& title, const bool& vsync);
   ~Engine();
 
   // load fonts and images
@@ -62,8 +61,18 @@ public:
   bool get_exit() const { return exit; }
   int get_width() const { return width; }
   int get_height() const { return height; }
-  float get_ft() const { return (float)frame_time; }
+
+  unsigned get_ft() const { return frame_time; }
   unsigned get_fps() const { return fps; }
+
+  int get_mouse_pos_x() const { return mouse_position_x; }
+  int get_mouse_pos_y() const { return mouse_position_y; }
+  bool get_mouse_button_up() const { return mouse_button_up; }
+  bool get_mouse_button_down() const { return mouse_button_down; }
+  int get_mouse_scroll() const { return mouse_scroll; }
+
+  // setters
+  void set_fps_cap(const float& set) { fps_cap = set; }
 };
 
 #endif

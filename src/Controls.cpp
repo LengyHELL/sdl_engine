@@ -104,8 +104,8 @@ void Button::draw(const Engine& engine) {
 }
 
 void Button::update(const Engine& engine) {
-  bool x_in_range = (engine.mouse_position_x >= position_x) && (engine.mouse_position_x <= (position_x + width));
-  bool y_in_range = (engine.mouse_position_y >= position_y) && (engine.mouse_position_y <= (position_y + height));
+  bool x_in_range = (engine.get_mouse_pos_x() >= position_x) && (engine.get_mouse_pos_x() <= (position_x + width));
+  bool y_in_range = (engine.get_mouse_pos_y() >= position_y) && (engine.get_mouse_pos_y() <= (position_y + height));
   mouse_hover = x_in_range && y_in_range;
 
   bool mouse_left = engine.mouse_state == SDL_BUTTON(SDL_BUTTON_LEFT);
@@ -118,10 +118,10 @@ void Button::update(const Engine& engine) {
   mouse_click = mouse_hover && mouse_left && !click_lock;
 
   if (on_mouse_down) {
-    selected = mouse_click && engine.mouse_button_down;
+    selected = mouse_click && engine.get_mouse_button_down();
   }
   else {
-    selected = mouse_click && engine.mouse_button_up;
+    selected = mouse_click && engine.get_mouse_button_up();
   }
 }
 
@@ -190,7 +190,7 @@ void Picker::draw(const Engine& engine) {
 }
 
 void Picker::update(const Engine& engine) {
-  Coord rel_mouse_pos(engine.mouse_position_x - position_x, engine.mouse_position_y - position_y);
+  Coord rel_mouse_pos(engine.get_mouse_pos_x() - position_x, engine.get_mouse_pos_y() - position_y);
   bool in_range = (rel_mouse_pos > Coord(0, 0)) && (rel_mouse_pos < Coord(width, height));
 
   bool prev = up.mouse_click || down.mouse_click;
@@ -198,7 +198,7 @@ void Picker::update(const Engine& engine) {
   down.update(engine);
   bool curr = up.mouse_click || down.mouse_click;
 
-  if (in_range) { actual += engine.mouse_scroll * step; }
+  if (in_range) { actual += engine.get_mouse_scroll() * step; }
 
   if (up.mouse_click && (timer <= 0)) { actual += step; }
   if (down.mouse_click && (timer <= 0)) { actual -= step; }

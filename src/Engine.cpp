@@ -2,7 +2,7 @@
 #include <iostream>
 #include <math.h>
 
-Engine::Engine(const int& width, const int& height, const std::string& title) : width(width), height(height), exit(false) {
+Engine::Engine(const int& width, const int& height, const std::string& title, const bool& vsync) : width(width), height(height), exit(false), vsync(vsync) {
   if(SDL_Init(SDL_INIT_VIDEO) < 0) {
     std::cerr << "SDL initialization failed!, SDL_Error: " << SDL_GetError() << std::endl;
   }
