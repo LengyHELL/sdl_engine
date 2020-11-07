@@ -189,6 +189,24 @@ void Engine::draw_image(const std::string& filename, const float& position_x, co
   draw_texture(texture, position_x, position_y, width, height, angle, color, cut, area);
 }
 
+Rect Engine::size_text(const std::string& text, const unsigned& size) const {
+  int w, h;
+  if(TTF_SizeText(font.at(size), text.c_str(), &w, &h) < 0) {
+    std::cerr << "Failed to get text size!, SDL_Error: " << SDL_GetError() << std::endl;
+    return Rect(0, 0, 0, 0);
+  }
+  return Rect(0, 0, w, h);
+}
+
+Rect Engine::size_image(const std::string& image) const {
+  int w, h;
+  if(SDL_QueryTexture(images.at(image), NULL, NULL, &w, &h) < 0) {
+    std::cerr << "Failed to get image size!, SDL_Error: " << SDL_GetError() << std::endl;
+    return Rect(0, 0, 0, 0);
+  }
+  return Rect(0, 0, w, h);
+}
+
 void Engine::update_inputs() {
   if (fps_cap > 0) {
     Uint32 t_frame_time = SDL_GetTicks() - ticks;

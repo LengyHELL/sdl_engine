@@ -8,6 +8,9 @@
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_image.h>
 
+#include "Coord.hpp"
+#include "Rect.hpp"
+
 class Engine {
   SDL_Window* window = NULL;
   SDL_Renderer* renderer = NULL;
@@ -48,12 +51,19 @@ public:
 
   // methods for operations
   void render();
+
+private:
   SDL_Texture* load_texture(const std::string& filename, SDL_Rect* area = NULL) const;
   SDL_Texture* texture_of_text(const std::string& text, const SDL_Color& color, const unsigned& size, SDL_Rect* area = NULL) const;
   SDL_Texture* const texture_of_image(const std::string& filename) const;
+public:
+
   void draw_texture(SDL_Texture* texture, const float& position_x, const float& position_y, const float& width = 0, const float& height = 0, const float& angle = 0, const SDL_Color* color = NULL, const SDL_Rect* const cut = NULL, SDL_Rect* area = NULL) const;
   void draw_text(const std::string& text, const int& position_x, const int& position_y, const SDL_Color& color, const unsigned& size) const;
   void draw_image(const std::string& filename, const float& position_x, const float& position_y, const float& width = 0, const float& height = 0, const float& angle = 0, const SDL_Color* color = NULL, SDL_Rect* cut = NULL, SDL_Rect* area = NULL) const;
+
+  Rect size_text(const std::string& text, const unsigned& size) const;
+  Rect size_image(const std::string& image) const;
   void update_inputs();
   void resize_window(const int& width, const int& height);
 
