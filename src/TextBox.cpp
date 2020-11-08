@@ -1,6 +1,33 @@
 #include "Controls.hpp"
 #include <iostream>
 
+std::list<std::string> convert(const Engine& engine, std::string text, const unsigned& text_size, const unsigned& width) {
+  std::list<std::string> list;
+  std::string ws = " \t\n\v\f\r";
+  int ls = 0;
+  int rs = text.find_first_of(ws);
+  if (rs < 0) { rs = text.size() - 1; }
+  while (rs >= 0) {
+    int next = text.find_first_of(ws, rs + 1);
+    if (next < 0) { next = text.size() - 1; }
+    Rect size = engine.size_text(text.substr(ls, (next - ls) + 1), text_size);
+
+    if (size.w > width) {
+      list.push_back(text.substr(ls, (rs - ls) + 1));
+      ls = rs + 1;
+      rs = text.find_first_of(ws, ls);
+    }
+    else if (next == (int)text.size() - 1) {
+      list.push_back(text.substr(ls, (next - ls) + 1));
+      rs = -1;
+    }
+    else {
+      rs = next;
+    }
+  }
+  return list;
+}
+
 TextBox::TextBox(const std::string& style, const Rect& body, const std::string& text,
   const unsigned& text_size, const SDL_Color& text_color, const Coord& cut_size)
   : text_box_frame(Frame(style, body, cut_size)), body(body), text(text), text_size(text_size),
@@ -12,10 +39,14 @@ void TextBox::draw(const Engine& engine) {
 
   text_box_frame.draw(engine);
 
-  Rect a_text = engine.size_text(text, text_size);
-  Coord place = Coord(body.x, body.y) + (Coord(body.w, body.h) / 2);
-  place -= Coord(a_text.w, a_text.h) / 2;
-  engine.draw_text(text, place, text_color, text_size);
+  lines = convert(engine, text, text_size, body.w - 10);
+
+  int it = 0;
+  for (const auto& l : lines) {
+    Coord place(body.x + 5, (body.y + 5) + text_size * it);
+    engine.draw_text(l, place, text_color, text_size);
+    ++it;
+  }
 }
 
 void TextBox::update(const Engine& engine) {

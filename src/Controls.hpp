@@ -42,6 +42,8 @@ class TextBox {
   unsigned text_size = 0;
   SDL_Color text_color = {0, 0, 0, 0};
 
+  std::list<std::string> lines;
+
 public:
   // variables
   bool mouse_hover = false;

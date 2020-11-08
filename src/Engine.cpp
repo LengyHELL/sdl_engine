@@ -1,6 +1,7 @@
 #include "Engine.hpp"
 #include <iostream>
 #include <math.h>
+#include <algorithm>
 
 Engine::Engine(const int& width, const int& height, const std::string& title, const bool& vsync) : width(width), height(height), exit(false), vsync(vsync) {
   if(SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -133,20 +134,22 @@ void Engine::draw_texture(SDL_Texture* texture, const Rect& body, const float& a
 }
 
 void Engine::draw_text(const std::string& text, const Coord& position, const SDL_Color& color, const unsigned& size) const {
-  SDL_Texture* texture = NULL;
-  if (!font.count(size)) {
-    std::cerr << "Engine::texture_of_text: invalid font size of " << size << std::endl;
+  if (text.size() > 0) {
+    SDL_Texture* texture = NULL;
+    if (!font.count(size)) {
+      std::cerr << "Engine::draw_text: invalid font size of " << size << std::endl;
+    }
+    SDL_Surface* surface = TTF_RenderText_Solid(font.at(size), text.c_str(), color);
+    if (surface == NULL) {
+      std::cerr << "Engine::draw_text: cannot create text!" << SDL_GetError() << std::endl;
+    }
+    else {
+      texture = SDL_CreateTextureFromSurface(renderer, surface);
+      SDL_FreeSurface(surface);
+    }
+    draw_texture(texture, Rect(position.x, position.y, 0, 0));
+    SDL_DestroyTexture(texture);
   }
-  SDL_Surface* surface = TTF_RenderText_Solid(font.at(size), text.c_str(), color);
-  if (surface == NULL) {
-    std::cerr << "Engine::texture_of_text: cannot create text!" << SDL_GetError() << std::endl;
-  }
-  else {
-    texture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_FreeSurface(surface);
-  }
-  draw_texture(texture, Rect(position.x, position.y, 0, 0));
-  SDL_DestroyTexture(texture);
 }
 
 void Engine::draw_image(const std::string& filename, const Rect& body, const float& angle, const SDL_Color& color, const Rect& source) const {
@@ -190,15 +193,68 @@ void Engine::update_inputs() {
   mouse_button_down = false;
   mouse_scroll = 0;
   while(SDL_PollEvent(&event)) {
-    if (event.type == SDL_QUIT) {
-      exit = true;
+    switch (event.type) {
+      case SDL_QUIT:
+        exit = true;
+        break;
+      case SDL_MOUSEWHEEL:
+        if (event.wheel.y > 0) { mouse_scroll = 1; }
+        if (event.wheel.y < 0) { mouse_scroll = -1; }
+        break;
+      case SDL_MOUSEBUTTONUP:
+        mouse_button_up = true;
+        break;
+      case SDL_MOUSEBUTTONDOWN:
+        mouse_button_down = true;
+        break;
+      case SDL_KEYDOWN:
+        if (event.key.keysym.sym == SDLK_BACKSPACE && text.size() > 0) {
+          if ((cursor == selection) && (cursor > 0)) {
+            text.erase(cursor - 1, 1);
+            --cursor;
+          }
+          else {
+            text.erase(std::min(cursor, selection), abs(cursor - selection));
+            cursor = std::min(cursor, selection);
+          }
+          selection = cursor;
+        }
+        else if (event.key.keysym.sym == SDLK_LEFT) {
+          if (cursor > 0) {
+            --cursor;
+            if (!(SDL_GetModState() & KMOD_SHIFT)) { selection = cursor; }
+          }
+        }
+        else if (event.key.keysym.sym == SDLK_RIGHT) {
+          if (cursor < (int)text.size()) {
+            ++cursor;
+            if (!(SDL_GetModState() & KMOD_SHIFT)) { selection = cursor; }
+          }
+        }
+        else if (event.key.keysym.sym == SDLK_c && SDL_GetModState() & KMOD_CTRL) {
+          SDL_SetClipboardText(text.substr(std::min(cursor, selection), abs(cursor - selection)).c_str());
+        }
+        else if (event.key.keysym.sym == SDLK_v && SDL_GetModState() & KMOD_CTRL) {
+          std::string paste = SDL_GetClipboardText();
+          text = text.substr(0, std::min(cursor, selection)) + paste + text.substr(std::max(cursor, selection));
+          cursor = std::min(cursor, selection);
+          cursor += paste.size();
+          selection = cursor;
+        }
+        break;
+      case SDL_TEXTINPUT:
+        if (!(SDL_GetModState() & KMOD_CTRL && (
+          event.text.text[0] == 'c' ||
+          event.text.text[0] == 'v' ||
+          event.text.text[0] == 'C' ||
+          event.text.text[0] == 'V'
+        ))) {
+          text = text.substr(0, std::min(cursor, selection)) + event.text.text + text.substr(std::max(cursor, selection));
+          ++cursor;
+          selection = cursor;
+        }
+        break;
     }
-    if (event.type == SDL_MOUSEWHEEL) {
-      if (event.wheel.y > 0) { mouse_scroll = 1; }
-      if (event.wheel.y < 0) { mouse_scroll = -1; }
-    }
-    mouse_button_up = (event.type == SDL_MOUSEBUTTONUP);
-    mouse_button_down = (event.type == SDL_MOUSEBUTTONDOWN);
   }
   keyboard_state = SDL_GetKeyboardState(NULL);
   if (mouse_button_up) {

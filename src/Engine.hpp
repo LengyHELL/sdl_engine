@@ -30,11 +30,18 @@ class Engine {
   float fps_timer = 0;
   float fps_cap = 0;
 
-  int mouse_position_x;
-  int mouse_position_y;
-  bool mouse_button_down;
-  bool mouse_button_up;
-  int mouse_scroll;
+  int mouse_position_x = 0;
+  int mouse_position_y = 0;
+  bool mouse_button_down = false;
+  bool mouse_button_up = false;
+  int mouse_scroll = 0;
+
+public:
+  std::string text = "";
+  std::string composition = "";
+  int cursor = 0;
+  int selection = 0;
+private:
 
   void draw_texture(SDL_Texture* texture, const Rect& body, const float& angle = 0,
     const SDL_Color& color = {255, 255, 255, 255}, const Rect& source = Rect(0, 0, 0, 0)) const;
