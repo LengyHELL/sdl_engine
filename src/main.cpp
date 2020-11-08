@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
     ib1.draw(engine);
     p1.draw(engine);
 
-    engine.draw_text(std::to_string(engine.get_fps()) + " fps", 5, 5, {255, 0, 0, 0}, 16);
+    engine.draw_text(std::to_string(engine.get_fps()) + " fps", Coord(5, 5), {255, 0, 0, 0}, 16);
     engine.render();
   }
   return 0;

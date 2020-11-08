@@ -9,29 +9,25 @@ TextButton::TextButton(const std::string& style, const Rect& body, const std::st
 void TextButton::draw(const Engine& engine) {
   const Coord cut_size = button_frame.get_cut_size();
   const Rect body = button_frame.get_body();
-  SDL_Rect a_cut;
-  a_cut.w = cut_size.x;
-  a_cut.h = cut_size.y;
+  Rect a_cut(0, 0, cut_size.x, cut_size.y);
 
   button_frame.draw(engine);
 
   if (mouse_click) {
-    SDL_Color color{255, 255, 255, 100};
     a_cut.x = 10 * cut_size.x;
     a_cut.y = 0;
-    engine.draw_image(button_frame.get_style(), body.x, body.y, body.w, body.h, 0, &color, &a_cut);
+    engine.draw_image(button_frame.get_style(), body, 0, {255, 255, 255, 100}, a_cut);
   }
   else if (mouse_hover) {
-    SDL_Color color{255, 255, 255, 100};
     a_cut.x = 9 * cut_size.x;
     a_cut.y = 0;
-    engine.draw_image(button_frame.get_style(), body.x, body.y, body.w, body.h, 0, &color, &a_cut);
+    engine.draw_image(button_frame.get_style(), body, 0, {255, 255, 255, 100}, a_cut);
   }
 
   Rect a_text = engine.size_text(text, text_size);
   Coord place = Coord(body.x, body.y) + (Coord(body.w, body.h) / 2);
   place -= Coord(a_text.w, a_text.h) / 2;
-  engine.draw_text(text, place.x, place.y, text_color, text_size);
+  engine.draw_text(text, place, text_color, text_size);
 }
 
 void TextButton::update(const Engine& engine) {

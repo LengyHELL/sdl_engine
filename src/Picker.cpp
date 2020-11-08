@@ -39,7 +39,7 @@ void Picker::draw(const Engine& engine) {
   Coord place = Coord(f_body.x, f_body.y) + (Coord(f_body.w, f_body.h) / 2);
   place -= Coord(a_text.w, a_text.h) / 2;
 
-  engine.draw_text(text, place.x, place.y, text_color, text_size);
+  engine.draw_text(text, place, text_color, text_size);
 }
 
 void Picker::update(const Engine& engine) {

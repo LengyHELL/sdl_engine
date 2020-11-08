@@ -15,19 +15,14 @@ Frame::Frame(const std::string& style, const Rect& body, const Coord& cut_size)
 }
 
 void Frame::draw(const Engine& engine) {
-  SDL_Rect a_cut;
-  a_cut.w = cut_size.x;
-  a_cut.h = cut_size.y;
-
-  a_cut.x = 8 * cut_size.x;
-  a_cut.y = 0;
-  engine.draw_image(style, body.x, body.y, body.w, body.h, 0, NULL, &a_cut);
+  Rect a_cut(8 * cut_size.x, 0, cut_size.x, cut_size.y);
+  engine.draw_image(style, body, 0, {255, 255, 255, 255}, a_cut);
 
   unsigned it = 0;
   for (const auto& c : style_cut) {
     a_cut.x = it * cut_size.x;
     a_cut.y = 0;
-    engine.draw_image(style, c.first.x, c.first.y, c.second.x, c.second.y, 0, NULL, &a_cut);
+    engine.draw_image(style, Rect(c.first.x, c.first.y, c.second.x, c.second.y), 0, {255, 255, 255, 255}, a_cut);
     ++it;
   }
 }

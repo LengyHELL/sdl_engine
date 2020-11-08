@@ -74,9 +74,17 @@ void Engine::load_font(const std::string& font_path, const unsigned& min_size, c
 }
 
 void Engine::load_image(const std::string& image_path) {
-  SDL_Texture* texture = load_texture(image_path);
+  SDL_Texture* texture = NULL;
+  SDL_Surface* surface = IMG_Load(image_path.c_str());
+  if (surface == NULL) {
+    std::cerr << "Engine::load_image: load failed!, File: " + image_path << IMG_GetError() << std::endl;
+  }
+  else {
+    texture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_FreeSurface(surface);
+  }
   if (texture == NULL) {
-    std::cerr << "Image load failed!, Image: " << image_path << std::endl;
+    std::cerr << "Engine::load_image: load failed!, File: " + image_path << IMG_GetError() << std::endl;
   }
   else {
     images.insert(std::make_pair(image_path, texture));
@@ -88,105 +96,66 @@ void Engine::unload_image(const std::string& image_path) {
   images.erase(image_path);
 }
 
-SDL_Texture* Engine::load_texture(const std::string& filename, SDL_Rect* area) const {
-  SDL_Texture* texture = NULL;
-  SDL_Surface* surface = IMG_Load(filename.c_str());
-  if (surface == NULL) {
-    std::cerr << "Engine::load_texture: load failed!, File: " + filename << IMG_GetError() << std::endl;
+void Engine::draw_texture(SDL_Texture* texture, const Rect& body, const float& angle, const SDL_Color& color, const Rect& source) const {
+  SDL_Rect rect;
+  rect.x = round(body.x);
+  rect.y = round(body.y);
+
+  if ((body.w + body.h) <= 0) {
+    SDL_QueryTexture(texture, 0, 0, &rect.w, &rect.h);
   }
   else {
-    texture = SDL_CreateTextureFromSurface(renderer, surface);
-    if (area != NULL) {
-      area->x = 0;
-      area->y = 0;
-      area->w = surface->w;
-      area->h = surface->h;
-    }
-    SDL_FreeSurface(surface);
+    rect.w = round(body.w);
+    rect.h = round(body.h);
   }
-  return texture;
+
+  SDL_Rect src;
+  src.x = round(source.x);
+  src.y = round(source.y);
+
+  if ((source.w + source.h) <= 0) {
+    SDL_QueryTexture(texture, 0, 0, &src.w, &src.h);
+  }
+  else {
+    src.w = round(source.w);
+    src.h = round(source.h);
+  }
+
+  SDL_SetTextureColorMod(texture, color.r, color.g, color.b);
+  SDL_SetTextureAlphaMod(texture, color.a);
+
+  if (SDL_RenderCopyEx(renderer, texture, &src, &rect, angle, NULL, SDL_FLIP_NONE) != 0) {
+    std::cerr << "Texture copying failed!, SDL_Error: " << SDL_GetError() << std::endl;
+  }
+
+  SDL_SetTextureColorMod(texture, 255, 255, 255);
+  SDL_SetTextureAlphaMod(texture, 255);
 }
 
-SDL_Texture* Engine::texture_of_text(const std::string& text, const SDL_Color& color, const unsigned& size, SDL_Rect* area) const {
+void Engine::draw_text(const std::string& text, const Coord& position, const SDL_Color& color, const unsigned& size) const {
   SDL_Texture* texture = NULL;
   if (!font.count(size)) {
     std::cerr << "Engine::texture_of_text: invalid font size of " << size << std::endl;
-    return texture;
   }
   SDL_Surface* surface = TTF_RenderText_Solid(font.at(size), text.c_str(), color);
   if (surface == NULL) {
-    std::cerr << "Engine::texture_of_text: cannot create text" << std::endl;
+    std::cerr << "Engine::texture_of_text: cannot create text!" << SDL_GetError() << std::endl;
   }
   else {
     texture = SDL_CreateTextureFromSurface(renderer, surface);
-    if (area != NULL) {
-      area->x = 0;
-      area->y = 0;
-      area->w = surface->w;
-      area->h = surface->h;
-    }
     SDL_FreeSurface(surface);
   }
-  return texture;
-}
-
-SDL_Texture* const Engine::texture_of_image(const std::string& filename) const {
-  SDL_Texture* texture = NULL;
-  try { texture = images.at(filename); }
-  catch (const std::out_of_range& e) {
-    std::cerr << "Engine::texture_of_image: image not loaded! " + filename << std::endl;
-  }
-  return texture;
-}
-
-void Engine::draw_texture(SDL_Texture* texture, const float& position_x, const float& position_y, const float& width, const float& height, const float& angle, const SDL_Color* color, const SDL_Rect* const cut, SDL_Rect* area) const {
-  bool def = false;
-  if ((width == 0) && (height == 0)) {
-    def = true;
-  }
-  else if ((width < 0) || (height < 0)) {
-    std::cerr << "Engine::draw_texture: invalid size" << std::endl;
-  }
-
-  SDL_Rect rect;
-  rect.x = round(position_x);
-  rect.y = round(position_y);
-
-  if (!def) {
-    rect.w = round(width);
-    rect.h = round(height);
-  }
-  else {
-    SDL_QueryTexture(texture, 0, 0, &rect.w, &rect.h);
-  }
-
-  if (color != NULL) {
-    SDL_SetTextureColorMod(texture, color->r, color->g, color->b);
-    SDL_SetTextureAlphaMod(texture, color->a);
-  }
-  if (SDL_RenderCopyEx(renderer, texture, cut, &rect, angle, NULL, SDL_FLIP_NONE) != 0) {
-    std::cerr << "Texture copying failed!, SDL_Error: " << SDL_GetError() << std::endl;
-  }
-  SDL_SetTextureColorMod(texture, 255, 255, 255);
-  SDL_SetTextureAlphaMod(texture, 255);
-
-  if (area != NULL) {
-    area->x = rect.x;
-    area->y = rect.y;
-    area->w = rect.w;
-    area->h = rect.h;
-  }
-}
-
-void Engine::draw_text(const std::string& text, const int& position_x, const int& position_y, const SDL_Color& color, const unsigned& size) const {
-  SDL_Texture* texture = texture_of_text(text, color, size, NULL);
-  draw_texture(texture, position_x, position_y);
+  draw_texture(texture, Rect(position.x, position.y, 0, 0));
   SDL_DestroyTexture(texture);
 }
 
-void Engine::draw_image(const std::string& filename, const float& position_x, const float& position_y, const float& width, const float& height, const float& angle, const SDL_Color* color, SDL_Rect* cut, SDL_Rect* area) const {
-  SDL_Texture* texture = texture_of_image(filename);
-  draw_texture(texture, position_x, position_y, width, height, angle, color, cut, area);
+void Engine::draw_image(const std::string& filename, const Rect& body, const float& angle, const SDL_Color& color, const Rect& source) const {
+  SDL_Texture* texture = NULL;
+  try { texture = images.at(filename); }
+  catch (const std::out_of_range& e) {
+    std::cerr << "Engine::draw_image: image not loaded! " + filename << std::endl;
+  }
+  draw_texture(texture, body, angle, color, source);
 }
 
 Rect Engine::size_text(const std::string& text, const unsigned& size) const {
