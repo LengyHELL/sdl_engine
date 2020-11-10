@@ -1,5 +1,4 @@
-#include "Controls.hpp"
-#include <iostream>
+#include "ImageButton.hpp"
 
 ImageButton::ImageButton(const std::string& style, const Rect& body,
   const std::string& image, const bool& on_mouse_down, const Rect& source_rect, const Coord& cut_size)

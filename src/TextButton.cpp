@@ -1,5 +1,4 @@
-#include "Controls.hpp"
-#include <iostream>
+#include "TextButton.hpp"
 
 TextButton::TextButton(const std::string& style, const Rect& body, const std::string& text,
   const unsigned& text_size, const SDL_Color& text_color, const bool& on_mouse_down, const Coord& cut_size)

@@ -1,5 +1,9 @@
 #include "Engine.hpp"
-#include "Controls.hpp"
+#include "TextButton.hpp"
+#include "ImageButton.hpp"
+#include "Frame.hpp"
+#include "Picker.hpp"
+#include "TextBox.hpp"
 
 int main(int argc, char** argv) {
   Engine engine(640, 480, "Test", false);

@@ -38,7 +38,6 @@ class Engine {
 
 public:
   std::string text = "";
-  std::string composition = "";
   int cursor = 0;
   int selection = 0;
 private:

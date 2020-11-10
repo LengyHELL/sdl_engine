@@ -1,4 +1,4 @@
-#include "Controls.hpp"
+#include "Frame.hpp"
 
 Frame::Frame(const std::string& style, const Rect& body, const Coord& cut_size)
   : style(style), body(body), cut_size(cut_size) {
