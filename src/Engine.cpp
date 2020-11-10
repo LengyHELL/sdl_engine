@@ -25,6 +25,7 @@ Engine::Engine(const int& width, const int& height, const std::string& title, co
   }
 
   update_inputs();
+  set_text_input(false);
 }
 
 Engine::~Engine() {
@@ -208,50 +209,64 @@ void Engine::update_inputs() {
         mouse_button_down = true;
         break;
       case SDL_KEYDOWN:
-        if (event.key.keysym.sym == SDLK_BACKSPACE && text.size() > 0) {
-          if ((cursor == selection) && (cursor > 0)) {
-            text.erase(cursor - 1, 1);
-            --cursor;
+        if (text_input) {
+          if (event.key.keysym.sym == SDLK_DELETE && text.size() > 0) {
+            if (cursor == selection) {
+              text.erase(cursor, 1);
+            }
+            else {
+              text.erase(std::min(cursor, selection), abs(cursor - selection));
+              cursor = std::min(cursor, selection);
+            }
+            selection = cursor;
           }
-          else {
-            text.erase(std::min(cursor, selection), abs(cursor - selection));
+          if (event.key.keysym.sym == SDLK_BACKSPACE && text.size() > 0) {
+            if ((cursor == selection) && (cursor > 0)) {
+              text.erase(cursor - 1, 1);
+              --cursor;
+            }
+            else {
+              text.erase(std::min(cursor, selection), abs(cursor - selection));
+              cursor = std::min(cursor, selection);
+            }
+            selection = cursor;
+          }
+          else if (event.key.keysym.sym == SDLK_LEFT) {
+            if (cursor > 0) {
+              --cursor;
+              if (!(SDL_GetModState() & KMOD_SHIFT)) { selection = cursor; }
+            }
+          }
+          else if (event.key.keysym.sym == SDLK_RIGHT) {
+            if (cursor < (int)text.size()) {
+              ++cursor;
+              if (!(SDL_GetModState() & KMOD_SHIFT)) { selection = cursor; }
+            }
+          }
+          else if (event.key.keysym.sym == SDLK_c && SDL_GetModState() & KMOD_CTRL) {
+            SDL_SetClipboardText(text.substr(std::min(cursor, selection), abs(cursor - selection)).c_str());
+          }
+          else if (event.key.keysym.sym == SDLK_v && SDL_GetModState() & KMOD_CTRL) {
+            std::string paste = SDL_GetClipboardText();
+            text = text.substr(0, std::min(cursor, selection)) + paste + text.substr(std::max(cursor, selection));
             cursor = std::min(cursor, selection);
+            cursor += paste.size();
+            selection = cursor;
           }
-          selection = cursor;
-        }
-        else if (event.key.keysym.sym == SDLK_LEFT) {
-          if (cursor > 0) {
-            --cursor;
-            if (!(SDL_GetModState() & KMOD_SHIFT)) { selection = cursor; }
-          }
-        }
-        else if (event.key.keysym.sym == SDLK_RIGHT) {
-          if (cursor < (int)text.size()) {
-            ++cursor;
-            if (!(SDL_GetModState() & KMOD_SHIFT)) { selection = cursor; }
-          }
-        }
-        else if (event.key.keysym.sym == SDLK_c && SDL_GetModState() & KMOD_CTRL) {
-          SDL_SetClipboardText(text.substr(std::min(cursor, selection), abs(cursor - selection)).c_str());
-        }
-        else if (event.key.keysym.sym == SDLK_v && SDL_GetModState() & KMOD_CTRL) {
-          std::string paste = SDL_GetClipboardText();
-          text = text.substr(0, std::min(cursor, selection)) + paste + text.substr(std::max(cursor, selection));
-          cursor = std::min(cursor, selection);
-          cursor += paste.size();
-          selection = cursor;
         }
         break;
       case SDL_TEXTINPUT:
-        if (!(SDL_GetModState() & KMOD_CTRL && (
-          event.text.text[0] == 'c' ||
-          event.text.text[0] == 'v' ||
-          event.text.text[0] == 'C' ||
-          event.text.text[0] == 'V'
-        ))) {
-          text = text.substr(0, std::min(cursor, selection)) + event.text.text + text.substr(std::max(cursor, selection));
-          ++cursor;
-          selection = cursor;
+        if (text_input) {
+          if (!(SDL_GetModState() & KMOD_CTRL && (
+            event.text.text[0] == 'c' ||
+            event.text.text[0] == 'v' ||
+            event.text.text[0] == 'C' ||
+            event.text.text[0] == 'V'
+          ))) {
+            text = text.substr(0, std::min(cursor, selection)) + event.text.text + text.substr(std::max(cursor, selection));
+            ++cursor;
+            selection = cursor;
+          }
         }
         break;
     }
@@ -269,4 +284,16 @@ void Engine::resize_window(const int& new_width, const int& new_height) {
   width = new_width;
   height = new_height;
   SDL_SetWindowSize(window, width, height);
+}
+
+void Engine::set_text_input(const bool& set) {
+  if (text_input != set) {
+    text_input = set;
+    if (text_input) {
+      SDL_StartTextInput();
+    }
+    else {
+      SDL_StopTextInput();
+    }
+  }
 }

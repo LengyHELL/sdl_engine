@@ -42,8 +42,9 @@ void TextBox::draw(const Engine& engine) {
   lines = convert(engine, text, text_size, body.w - 10);
 
   int it = 0;
+  int padding = (int)(cut_size.len() * 1.5);
   for (const auto& l : lines) {
-    Coord place(body.x + 5, (body.y + 5) + text_size * it);
+    Coord place(body.x + padding, (body.y + padding) + text_size * it);
     engine.draw_text(l, place, text_color, text_size);
     ++it;
   }

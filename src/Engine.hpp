@@ -36,11 +36,10 @@ class Engine {
   bool mouse_button_up = false;
   int mouse_scroll = 0;
 
-public:
+  bool text_input = false;
   std::string text = "";
   int cursor = 0;
   int selection = 0;
-private:
 
   void draw_texture(SDL_Texture* texture, const Rect& body, const float& angle = 0,
     const SDL_Color& color = {255, 255, 255, 255}, const Rect& source = Rect(0, 0, 0, 0)) const;
@@ -85,8 +84,13 @@ public:
   bool get_mouse_button_down() const { return mouse_button_down; }
   int get_mouse_scroll() const { return mouse_scroll; }
 
+  std::string get_input_text() const { return text; }
+  int get_input_cursor() const { return cursor; }
+  int get_input_selection() const { return selection; }
+
   // setters
   void set_fps_cap(const float& set) { fps_cap = set; }
+  void set_text_input(const bool& set);
 };
 
 #endif
