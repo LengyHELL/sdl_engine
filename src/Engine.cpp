@@ -134,7 +134,7 @@ void Engine::draw_texture(SDL_Texture* texture, const Rect& body, const float& a
   SDL_SetTextureAlphaMod(texture, 255);
 }
 
-void Engine::draw_text(const std::string& text, const Coord& position, const SDL_Color& color, const unsigned& size) const {
+void Engine::draw_text(const std::string& text, const Coord& position, const SDL_Color& color, const unsigned& size, const Rect& source) const {
   if (text.size() > 0) {
     SDL_Texture* texture = NULL;
     if (!font.count(size)) {
@@ -148,7 +148,7 @@ void Engine::draw_text(const std::string& text, const Coord& position, const SDL
       texture = SDL_CreateTextureFromSurface(renderer, surface);
       SDL_FreeSurface(surface);
     }
-    draw_texture(texture, Rect(position.x, position.y, 0, 0));
+    draw_texture(texture, Rect(position.x, position.y, source.w, source.h), 0, {255, 255, 255, 255}, source);
     SDL_DestroyTexture(texture);
   }
 }
@@ -234,14 +234,14 @@ void Engine::update_inputs() {
           else if (event.key.keysym.sym == SDLK_LEFT) {
             if (cursor > 0) {
               --cursor;
-              if (!(SDL_GetModState() & KMOD_SHIFT)) { selection = cursor; }
             }
+            if (!(SDL_GetModState() & KMOD_SHIFT)) { selection = cursor; }
           }
           else if (event.key.keysym.sym == SDLK_RIGHT) {
             if (cursor < (int)text.size()) {
               ++cursor;
-              if (!(SDL_GetModState() & KMOD_SHIFT)) { selection = cursor; }
             }
+            if (!(SDL_GetModState() & KMOD_SHIFT)) { selection = cursor; }
           }
           else if (event.key.keysym.sym == SDLK_c && SDL_GetModState() & KMOD_CTRL) {
             SDL_SetClipboardText(text.substr(std::min(cursor, selection), abs(cursor - selection)).c_str());

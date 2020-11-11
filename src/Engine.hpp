@@ -61,7 +61,7 @@ public:
   // methods for operations
   void render();
 
-  void draw_text(const std::string& text, const Coord& position, const SDL_Color& color, const unsigned& size) const;
+  void draw_text(const std::string& text, const Coord& position, const SDL_Color& color, const unsigned& size, const Rect& source = Rect(0, 0, 0, 0)) const;
   void draw_image(const std::string& filename, const Rect& body, const float& angle = 0,
     const SDL_Color& color = {255, 255, 255, 255}, const Rect& source = Rect(0, 0, 0, 0)) const;
 

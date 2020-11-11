@@ -1,4 +1,7 @@
 #include "Engine.hpp"
+#include "Rect.hpp"
+#include "Coord.hpp"
+
 #include "TextButton.hpp"
 #include "ImageButton.hpp"
 #include "Frame.hpp"

@@ -18,8 +18,9 @@ class InputBox {
   bool on_mouse_down = false;
   bool click_lock = true;
 
-  int selection_start = 0;
-  int selection_end = 0;
+  int selection = 0;
+  
+  int window_pos = 0;
 
 public:
   // variables
