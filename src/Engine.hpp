@@ -75,7 +75,7 @@ public:
   int get_width() const { return width; }
   int get_height() const { return height; }
 
-  unsigned get_ft() const { return frame_time; }
+  float get_ft() const { return (float)frame_time; }
   unsigned get_fps() const { return fps; }
 
   int get_mouse_pos_x() const { return mouse_position_x; }
