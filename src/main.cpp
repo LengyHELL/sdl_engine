@@ -32,7 +32,7 @@ public:
       jump_lock = true;
       force.y = -50;
     }
-    else { force.y += 1; }
+    else { force.y += 15 * (engine.get_ft() / 100); }
     if (!engine.keyboard_state[SDL_SCANCODE_SPACE]) { jump_lock = false; }
 
     pos.y += force.y * (engine.get_ft() / 100);
@@ -154,7 +154,7 @@ int main(int argc, char** argv) {
 
     engine.draw_text("Score: " + std::to_string(score), Coord(280, 50), {0, 0, 0, 0}, 32);
 
-    engine.draw_text(std::to_string(engine.get_fps()) + " fps", Coord(5, 5), {255, 0, 0, 0}, 16);
+    engine.draw_text(std::to_string(engine.get_fps()) + " fps", Coord(5, 5), {0, 0, 0, 0}, 16);
     engine.render();
   }
   return 0;

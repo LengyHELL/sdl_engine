@@ -23,12 +23,13 @@ class Engine {
   bool exit = false;
 
   Uint32 ticks = 0;
-  Uint32 frame_time;
+  Uint32 frame_time = 0;
   bool vsync = false;
   unsigned fps = 0;
   unsigned frame_counter = 0;
   float fps_timer = 0;
   float fps_cap = 0;
+  float delay = 0;
 
   int mouse_position_x = 0;
   int mouse_position_y = 0;

@@ -42,6 +42,21 @@ Engine::~Engine() {
 }
 
 void Engine::render() {
+  SDL_RenderPresent(renderer);
+  SDL_RenderClear(renderer);
+
+  if (fps_cap > 0) {
+    Uint32 t_frame_time = SDL_GetTicks() - ticks;
+    delay += (1000 / fps_cap) - (float)t_frame_time;
+
+    if (delay > 0) {
+      SDL_Delay((Uint32)delay);
+      delay -= floor(delay);
+    }
+  }
+
+  frame_time = SDL_GetTicks() - ticks;
+  ticks = SDL_GetTicks();
 
   //calculating fps
   fps_timer += get_ft();
@@ -52,9 +67,6 @@ void Engine::render() {
     fps = frame_counter;
     frame_counter = 0;
   }
-
-  SDL_RenderPresent(renderer);
-  SDL_RenderClear(renderer);
 }
 
 void Engine::load_font(const std::string& font_path, const unsigned& min_size, const unsigned& max_size, const unsigned& step) {
@@ -181,15 +193,6 @@ Rect Engine::size_image(const std::string& image) const {
 }
 
 void Engine::update_inputs() {
-  if (fps_cap > 0) {
-    Uint32 t_frame_time = SDL_GetTicks() - ticks;
-    if (t_frame_time < (1000 / fps_cap)) {
-      SDL_Delay((1000 / fps_cap) - t_frame_time);
-    }
-  }
-  frame_time = SDL_GetTicks() - ticks;
-  ticks = SDL_GetTicks();
-
   mouse_button_up = false;
   mouse_button_down = false;
   mouse_scroll = 0;
